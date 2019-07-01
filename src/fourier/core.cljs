@@ -29,6 +29,14 @@
                      (cis (/ (* -2.0 Math/PI n t) (count zs))))))
       (complex (/ (count zs)) 0))))
 
+(defn inv-dft [bins]
+  (for [n (range (count bins))]
+    (reduce complex+
+            (map complex*
+                 bins
+                 (for [t (range (count bins))]
+                   (cis (/ (* 2.0 Math/PI n t) (count bins))))))))
+
 ; client necessities
 
 (defn read-coords []
@@ -64,7 +72,11 @@
 
 (defn update-draw-out [bins]
   "Update output canvas"
-  nil)
+  (let [draw-out-canvas (.getElementById js/document "draw-out")
+        ctx (.getContext draw-out-canvas "2d")]
+    (do
+      (.clearRect ctx 0 0 (.-width draw-out-canvas) (.-height draw-out-canvas))
+      (draw-path ctx (inv-dft bins)))))
 
 (defn on-mouse-move [event]
   (let [coords (.getElementById js/document "coords")
