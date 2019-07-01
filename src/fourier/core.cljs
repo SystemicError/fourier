@@ -21,11 +21,13 @@
 
 (defn dft [zs]
   (for [n (range (count zs))]
-    (reduce complex+
-            (map *
-                 zs
-                 (for [t (range (count zs))]
-                   (cis (/ (* -2.0 Math/PI n t) (count zs))))))))
+    (complex*
+      (reduce complex+
+              (map complex*
+                   zs
+                   (for [t (range (count zs))]
+                     (cis (/ (* -2.0 Math/PI n t) (count zs))))))
+      (complex (/ (count zs)) 0))))
 
 ; client necessities
 
@@ -54,10 +56,15 @@
 (defn update-draw-in []
   "Update input canvas."
   (let [draw-in-canvas (.getElementById js/document "draw-in")
-        ctx (.getContext draw-in-canvas "2d")]
+        ctx (.getContext draw-in-canvas "2d")
+        zs (read-coords)]
     (do
       (.clearRect ctx 0 0 (.-width draw-in-canvas) (.-height draw-in-canvas))
-      (draw-path ctx (read-coords)))))
+      (draw-path ctx zs))))
+
+(defn update-draw-out [bins]
+  "Update output canvas"
+  nil)
 
 (defn on-mouse-move [event]
   (let [coords (.getElementById js/document "coords")
@@ -75,8 +82,13 @@
   (let [coords (.getElementById js/document "coords")]
     (set! (.-value coords) "")))
 
+(defn on-mouse-up [event]
+  (let [bins (dft (read-coords))]
+    (set! (.-value (.getElementById js/document "bins")) (str bins))
+    (update-draw-out bins)))
+
 ; event hooks
 
 (set! (.-onmousemove (.getElementById js/document "draw-in")) on-mouse-move)
 (set! (.-onmousedown (.getElementById js/document "draw-in")) on-mouse-down)
-
+(set! (.-onmouseup (.getElementById js/document "draw-in")) on-mouse-up)
