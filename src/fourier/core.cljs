@@ -42,8 +42,7 @@
 (defn read-coords []
   "Returns a list of all segments"
   (let [coords (.-value (.getElementById js/document "coords"))
-        lines (str/split-lines coords)
-        dummy (js/console.log lines)]
+        lines (str/split-lines coords)]
     (for [line lines]
       (let [fields (str/split (str/trim line) #"\t")
             x (js/parseInt (nth fields 0))
@@ -73,10 +72,12 @@
 (defn update-draw-out [bins]
   "Update output canvas"
   (let [draw-out-canvas (.getElementById js/document "draw-out")
-        ctx (.getContext draw-out-canvas "2d")]
+        ctx (.getContext draw-out-canvas "2d")
+        resolution (.-value (.getElementById js/document "resolution"))
+        dummy (js/console.log resolution)]
     (do
       (.clearRect ctx 0 0 (.-width draw-out-canvas) (.-height draw-out-canvas))
-      (draw-path ctx (inv-dft (take 5 bins))))))
+      (draw-path ctx (inv-dft (take (int (/ (* (count bins) resolution) 100.0)) bins))))))
 
 (defn on-mouse-move [event]
   (let [coords (.getElementById js/document "coords")
@@ -90,11 +91,11 @@
         (update-draw-in)))))
 
 
-(defn on-mouse-down [event]
+(defn on-mouse-down []
   (let [coords (.getElementById js/document "coords")]
     (set! (.-value coords) "")))
 
-(defn on-mouse-up [event]
+(defn on-mouse-up []
   (let [bins (dft (read-coords))]
     (set! (.-value (.getElementById js/document "bins")) (str bins))
     (update-draw-out bins)))
@@ -104,3 +105,4 @@
 (set! (.-onmousemove (.getElementById js/document "draw-in")) on-mouse-move)
 (set! (.-onmousedown (.getElementById js/document "draw-in")) on-mouse-down)
 (set! (.-onmouseup (.getElementById js/document "draw-in")) on-mouse-up)
+(set! (.-oninput (.getElementById js/document "resolution")) on-mouse-up)
