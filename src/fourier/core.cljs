@@ -76,7 +76,7 @@
         ctx (.getContext draw-out-canvas "2d")]
     (do
       (.clearRect ctx 0 0 (.-width draw-out-canvas) (.-height draw-out-canvas))
-      (draw-path ctx (inv-dft bins)))))
+      (draw-path ctx (inv-dft (take 5 bins))))))
 
 (defn on-mouse-move [event]
   (let [coords (.getElementById js/document "coords")
